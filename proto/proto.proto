@@ -1,0 +1,74 @@
+syntax = "proto3";
+package proto;
+
+option go_package = "/proto";
+// protoc --go_out=. --go-grpc_out=. ../*.proto
+
+// ===== Basic ======================================
+
+message Empty {}
+
+message Id{
+    string id = 1;
+}
+
+message Response {
+    bool success = 1;
+    string message = 2;
+}
+
+// ===== Auth Service ==================================================
+
+message User {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+    string phone = 5;
+}
+
+service AuthService {
+    rpc Ping (Empty) returns (Response) {}
+    rpc GetProfile (Id) returns (User) {}
+    rpc Register (User) returns (Response) {}
+    // rpc UpdateUser (User) returns (UserResponse) {}
+    // rpc DeleteUser (UserRequest) returns (UserResponse) {}
+}
+
+// ===== Catalog Service ==============================================
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string image = 4;
+    float price = 5;
+}
+
+message Catalog {
+    repeated Product products = 1;
+}
+
+service CatalogService {
+    rpc Ping (Empty) returns (Response) {}
+    rpc GetCatalog (Empty) returns (Catalog) {}
+    rpc GetProduct (Id) returns (Product) {}
+    rpc AddProduct (Product) returns (Response) {}
+    rpc UpdateProduct (Product) returns (Response) {}
+    rpc DeleteProduct (Id) returns (Response) {}
+}
+
+// ===== Cart Service ==================================================
+
+message Cart {
+    string user_id = 2;
+    repeated Product products = 3;
+}
+
+service CartService {
+    rpc Ping (Empty) returns (Response) {}
+    rpc GetCart (Id) returns (Cart) {}
+    rpc AddToCart (Id) returns (Response) {}
+    // rpc RemoveFromCart (ProductRequest) returns (CartResponse) {}
+    // rpc ClearCart (UserRequest) returns (CartResponse) {}
+}
