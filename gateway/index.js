@@ -14,10 +14,12 @@ app.use(express.json());
 // Routes
 const authRoutes = require('./routes/authroutes');
 const catalogRoutes = require('./routes/catalogroutes');
+const cartRoutes = require('./routes/cartroutes');
 
 
 app.use('/auth', authRoutes);
 app.use('/catalog', catalogRoutes);
+app.use('/cart', cartRoutes);
 
 
 // ===================================================================================

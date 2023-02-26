@@ -10,7 +10,7 @@ const router = express.Router();
 // ===================================================================================
 
 
-const PROTO_PATH = path.join(__dirname, '../../proto.proto');
+const PROTO_PATH = path.join(__dirname, '../../proto/proto.proto');
 const packageDefinition = protoLoader.loadSync(PROTO_PATH);
 const AuthService = grpc.loadPackageDefinition(packageDefinition).proto.AuthService;
 
@@ -22,29 +22,51 @@ const authClient = new AuthService('localhost:50051', grpc.credentials.createIns
 
 router.get('/', (req, res) => { res.send('Auth route'); });
 
-router.get('/ping', (req, res) => {
+//----------------------------------------------------------------------------------
+
+router.post('/ping', (req, res) => {
     authClient.ping({}, (err, response) => {
-      res.send(response.message);
+      res.json(response);
     });
 });
 
-router.get('/profile', (req, res) => {
+//----------------------------------------------------------------------------------
+
+router.post('/login', (req, res) => {
+  let { email, password } = req.body;
+
+  authClient.login({email, password}, (err, response) => {
+    if(err) res.json({ error: err });
+    else res.json(response);
+  });
+});
+
+//----------------------------------------------------------------------------------
+
+router.post('/profile', (req, res) => {
   authClient.getProfile({id: "1"}, (err, response) => {
     if(err) res.json({ error: err });
     else res.json(response);
   });
 });
 
-router.get('/register', (req, res) => {
-  let user = {
-    id: "2",
-    name: "John Doe",
-    email: "johhny@gmail.com",
-    password: "12345678",
-    phone: "1234567890"
-  };
+//----------------------------------------------------------------------------------
+
+router.post('/register', (req, res) => {
+  let { user } = req.body;
 
   authClient.register(user, (err, response) => {
+    if(err) res.json({ error: err });
+    else res.json(response);
+  });
+});
+
+//----------------------------------------------------------------------------------
+
+router.post('/verify', (req, res) => {
+  let { token } = req.body;
+
+  authClient.verify({id: token}, (err, response) => {
     if(err) res.json({ error: err });
     else res.json(response);
   });
@@ -53,4 +75,21 @@ router.get('/register', (req, res) => {
 
 // ===================================================================================
 
+const verifyToken = (req, res, next) => {
+  try {
+    let token = req.headers.authorization.split(" ")[1];
+    authClient.verify({id: token}, (err, response) => {
+      if(response.success){
+        req.user = response.message;
+        next();
+      } else {
+        return res.json({ success: false, message: "Unauthorized" });
+      }
+    });
+  } catch (error) {
+    return res.json({ success: false, message: "Unauthorized" });
+  }
+}
+
 module.exports = router;
+module.exports.verifyToken = verifyToken;

@@ -20,7 +20,6 @@ message Response {
 // ===== Auth Service ==================================================
 
 message User {
-    string id = 1;
     string name = 2;
     string email = 3;
     string password = 4;
@@ -31,6 +30,8 @@ service AuthService {
     rpc Ping (Empty) returns (Response) {}
     rpc GetProfile (Id) returns (User) {}
     rpc Register (User) returns (Response) {}
+    rpc Login (User) returns (Response) {}
+    rpc Verify (Id) returns (Response) {}
     // rpc UpdateUser (User) returns (UserResponse) {}
     // rpc DeleteUser (UserRequest) returns (UserResponse) {}
 }
